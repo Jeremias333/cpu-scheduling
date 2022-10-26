@@ -18,6 +18,6 @@ run-dev:
 clean-dev:
 	rm ./rate-dev
 
-dev: ./rate
+dev: ./rate-dev
 
 rate: ./rate
