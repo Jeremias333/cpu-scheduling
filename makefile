@@ -1,23 +1,23 @@
 .PHONY: run clean run-dev clean-dev
 
-./build: ./src/main.c
+./rate: ./src/main.c
 	gcc $^ -o $@
 
-./build-dev: ./dev/main.c
+./rate-dev: ./dev/main.c
 	gcc $^ -o $@
 
 run: 
-	./build
+	./rate
 
 clean:
-	rm build
+	rm rate
 
 run-dev:
-	./dev/build
+	./rate
 
 clean-dev:
-	rm ./dev/build
+	rm ./rate-dev
 
-dev: ./build-dev
+dev: ./rate
 
-build: ./build
+rate: ./rate
