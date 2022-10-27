@@ -28,11 +28,6 @@ int main(int argc, char **argv) {
     if(argc < 2) {
         print_err("Nenhum arquivo de entrada foi passado como argumento");
     }else{
-        /*
-            ERRO: Passando o nome do arquivo existe um problema
-            provavelmente um erro na função exists_file_path(...)
-        */
-
 
         //Verifica existencia de parametro passando path do arquivo
         if (exists_file_path(address_path) == 1){
@@ -85,6 +80,9 @@ int process_file_address(char *file_name){
             fclose(arq_address);
             return 1;
         }
+
+        ungetc(c, arq_address);
+        
         printf("Arquivo aberto com sucesso");
         fclose(arq_address);
     }else{
