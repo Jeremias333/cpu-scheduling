@@ -4,7 +4,7 @@
 #include "unistd.h"
 
 //Error CONSTANTES
-#define DEFAULT_ERR_MSG "\nOcorreu um problema: "
+#define DEFAULT_ERR_MSG "Ocorreu um problema: "
 #define CLOSE_MSG "PROGRAMA ENCERRADO\n"
 
 //Global VARS
@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
             int proceed = process_file_address(address_path);
             if (proceed == 0){
                 //processamento do arquivo
+                printf("Inicializou o processo");
             }else{
                 //irá encerrar a aplicação com mensagem de erro
                 exit(1);
@@ -76,10 +77,18 @@ int process_file_address(char *file_name){
     }
 
     arq_address = fopen(file_name, "r");
-
-    if (arq_address == NULL){
-        char *ERR = DEFAULT_ERR_MSG"Ao abrir o arquivo. Está vazio ou não existe";
+    if(arq_address){
+        int c = fgetc(arq_address);
+        if(c == EOF){
+            char *ERR = DEFAULT_ERR_MSG"Ao abrir o arquivo. Está vazio";
+            print_err(ERR);
+            fclose(arq_address);
+            return 1;
+        }
+        printf("Arquivo aberto com sucesso");
         fclose(arq_address);
+    }else{
+        char *ERR = DEFAULT_ERR_MSG"Ao abrir o arquivo. Não existe";
         print_err(ERR);
         return 1;
     }
