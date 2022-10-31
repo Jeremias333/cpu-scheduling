@@ -23,7 +23,7 @@ typedef struct {
     char *name; // nome da task
     int period; // de quanta em quantas unidades de tempo irá iniciar a task
     int cpu_burst; // tempo de execução necessário
-    char state; // estado atual (D, F, H, K)
+    char state; // estado atual (P, D, F, H, K)
     int rest_burst; // tempo restante para terminar a execução
 }task;
 
@@ -41,7 +41,7 @@ void process();
 
 
 int main(int argc, char **argv) {
-    printf("Dev area operating...\n");
+    printf("Production area operating...\n");
 
      char *address_path = argv[1];
 
