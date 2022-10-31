@@ -53,3 +53,8 @@ dkms.conf
 
 rate
 rate-dev
+test_struct
+test_get_infos
+
+.vscode/
+*.txt
