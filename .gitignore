@@ -55,6 +55,7 @@ rate
 rate-dev
 test_struct
 test_get_infos
+test_calc
 
 .vscode/
 *.txt

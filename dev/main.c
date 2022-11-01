@@ -260,7 +260,7 @@ void process(){
             temp.period = atoi(words[1]);
             temp.cpu_burst = atoi(words[2]);
             temp.state = 'D'; //Atribuindo valor padrão ao estado da task
-            temp.rest_burst = 0;
+            temp.rest_burst = atoi(words[2]);
 
             array_tasks[count-1] = temp;// já que o count foi utilizado para extrair o tempo total
                                         // utilizamos o count-1 para guardar a task no array desde
