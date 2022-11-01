@@ -15,13 +15,14 @@ typedef struct {
 int size_tasks = 2; // lembrar de criar esta variavel e baseado na quantidade de tasks criar um vetor de tasks
 
 int who_is_processing(task *array_tasks, int size_tasks);
+void update_rest_burst(task *array_tasks, int size_tasks);
 
 int main(){
     task array_tasks[size_tasks];
     int time_total = 165;
     
     task t1;
-    t1.id = 0;
+    t1.id = 1;
     t1.name = "T1";
     t1.period = 25;
     t1.cpu_burst = 30;
@@ -29,11 +30,11 @@ int main(){
     t1.rest_burst = 30;
 
     task t2;
-    t2.id = 1;
+    t2.id = 2;
     t2.name = "T2";
     t2.period = 80;
     t2.cpu_burst = 120;
-    t2.state = 'D';
+    t2.state = 'C';
     t2.rest_burst = 120;
 
     array_tasks[0] = t1;
@@ -53,6 +54,11 @@ int main(){
     int p;
 
     for(int i = 0; i < time_total; i++){
+        //Atualizando o rest_burst de cada task
+        update_rest_burst(array_tasks, size_tasks);
+        //Verificando qual task está em execução nesta unidade de tempo
+
+        /* ERRO - Sempre retorna 0*/
         p = who_is_processing(array_tasks, size_tasks);
         printf("Processing: %d \n", p);
     }
@@ -64,13 +70,13 @@ int main(){
 int who_is_processing(task *array_tasks, int size_tasks){
     //Irá retornar o id da task que está sendo processada
     int id_processing = 0;
-    for(int i = 0; i < size_tasks; i++){
+    for(int i = 1; i < size_tasks; i++){
         if(array_tasks[i].state == 'P'){
             id_processing = i;
             return id_processing;
         }
     }
-    return id_processing;
+    return id_processing;//em caso de retorno 0 nenhuma delas estão em execução.
 }
 
 void should_process_now(task *array_tasks, int size_tasks, int act_time){
@@ -91,7 +97,7 @@ void should_change_state(task *array_tasks, int size_tasks, int act_time, int ti
     }
 }
 
-void update_rest_burst(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id){
+void update_rest_burst(task *array_tasks, int size_tasks){
     //Irá atualizar o tempo restante para a task reiniciar.
     //Para esse caso estamos diminuindo.
     for(int i = 1; i < size_tasks; i++){
