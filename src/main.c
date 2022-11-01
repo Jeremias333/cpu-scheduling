@@ -172,7 +172,7 @@ int count_lines_in_file(){
 
     fseek(arq_address, 0, SEEK_SET);
 
-    return count;
+    return count+1;
 }
 
 int count_higher_line(){
@@ -236,7 +236,7 @@ void process(){
     */
    
     char act_line[char_count];
-    task array_tasks[count_lines+1];
+    task array_tasks[count_lines];
     int count = 0;
 
     while(!feof(arq_address)){
@@ -255,24 +255,22 @@ void process(){
             // printf("words[0]: %s \n", words[0]);
             // printf("words[1]: %s \n", words[1]);
             // printf("words[2]: %s \n", words[2]);
-            temp.id = count-1;
+            temp.id = count;
             strcpy(temp.name, words[0]);
             temp.period = atoi(words[1]);
             temp.cpu_burst = atoi(words[2]);
             temp.state = 'D'; //Atribuindo valor padrão ao estado da task
             temp.rest_burst = atoi(words[2]);
 
-            array_tasks[count-1] = temp;// já que o count foi utilizado para extrair o tempo total
-                                        // utilizamos o count-1 para guardar a task no array desde
-                                        // a posição 0;
+            array_tasks[count] = temp;
+
         }
-        
         count++;
     }
 
     fclose(arq_address);
 
-    for(int i = 0; i < count_lines; i++){
+    for(int i = 1; i < count_lines; i++){
         printf("id: %d \n", array_tasks[i].id);
         printf("name: %s \n", array_tasks[i].name);
         printf("period: %d \n", array_tasks[i].period);
