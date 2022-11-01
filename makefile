@@ -12,6 +12,9 @@
 ./test_get_infos: ./dev/test_get_infos.c
 	gcc $^ -o $@
 
+./test_calc: ./dev/test_calc.c
+	gcc $^ -o $@
+
 run: 
 	./rate
 
@@ -28,4 +31,4 @@ dev: ./rate-dev
 
 rate: ./rate
 
-test: ./test_struct ./test_get_infos
+test: ./test_struct ./test_get_infos ./test_calc
