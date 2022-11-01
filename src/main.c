@@ -11,7 +11,8 @@
 
 //Global VARS
 FILE *arq_address; //Endereço do arquivo de entrada total
-int time_total = 0; //Tempo total de execução do programa
+int time_total = 0; //Tempo total de execução da CPU
+int time_idle = 0; //Tempo de idle da CPU
 char *words[3]; //Array de strings para armazenar as palavras de cada linha do arquivo de entrada
 int count_lines = 0; //Conta a quantidade de linhas do arquivo de entrada
 int char_count = 0; // Conta a quantidade de caracteres do arquivo de entrada
@@ -23,7 +24,12 @@ typedef struct {
     char *name; // nome da task
     int period; // de quanta em quantas unidades de tempo irá iniciar a task
     int cpu_burst; // tempo de execução necessário
-    char state; // estado atual (P, D, F, H, K)
+    char state; // estado atual (P, C, F, H, K)
+                // P = Processing
+                // C = Created
+                // F = Finished
+                // H = Hold
+                // K = Killed
     int rest_burst; // tempo restante para terminar a execução
 }task;
 
@@ -107,7 +113,6 @@ int process_file_address(char *file_name){
         
         printf("Arquivo aberto com sucesso\n");
         fseek(arq_address, 0, SEEK_SET);
-        // fclose(arq_address);
     }else{
         char *ERR = DEFAULT_ERR_MSG"Ao abrir o arquivo. Não existe";
         print_err(ERR);
@@ -209,7 +214,7 @@ int count_chars_in_file(){
          
         Necessário utilizar um endereço global para guardar dados do arquivo
     */
-    // arq_address = fopen("ratea.txt", "r");e
+
 
     int char_count = 0;
     char c;
@@ -259,7 +264,7 @@ void process(){
             strcpy(temp.name, words[0]);
             temp.period = atoi(words[1]);
             temp.cpu_burst = atoi(words[2]);
-            temp.state = 'D'; //Atribuindo valor padrão ao estado da task
+            temp.state = 'C'; //Atribuindo valor padrão ao estado da task (created)
             temp.rest_burst = atoi(words[2]);
 
             array_tasks[count] = temp;
