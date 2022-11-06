@@ -16,6 +16,10 @@ int size_tasks = 2; // lembrar de criar esta variavel e baseado na quantidade de
 
 int who_is_processing(task *array_tasks, int size_tasks);
 void update_rest_burst(task *array_tasks, int size_tasks);
+void should_process_now(task *array_tasks, int size_tasks, int act_time);
+void should_change_state(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id);
+void populate_queue_by_priority(task *array_tasks, int size_tasks, int act_time);
+
 
 int main(){
     task array_tasks[size_tasks];
@@ -104,5 +108,17 @@ void update_rest_burst(task *array_tasks, int size_tasks){
         if(array_tasks[i].rest_burst >= 0){
             array_tasks[i].rest_burst--;
         }
+    }
+}
+
+void populate_queue_by_priority(task *array_tasks, int size_tasks, int act_time){
+    //Irá popular a fila de prioridades
+    
+    int array_tasks[size_tasks][2];
+    
+    //Preenchendo a matriz com os valores de id e periodo
+    for(int i = 1; i < size_tasks; i++){
+        array_tasks[i][0] = array_tasks[i].id;
+        array_tasks[i][1] = array_tasks[i].period;
     }
 }
