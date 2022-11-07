@@ -24,7 +24,7 @@ int size_tasks = 4; // lembrar de criar esta variavel e baseado na quantidade de
 
 int who_is_processing(task *array_tasks, int size_tasks);
 void update_rest_burst(task *array_tasks, int size_tasks, int act_task_id);
-void next_to_process(task *array_tasks, int size_tasks, int act_time);
+void next_to_process(task *array_tasks, int size_tasks, int *task_queue_id, int act_task_id);
 char should_change_state(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id);
 void populate_queue_by_priority(task *array_tasks, int *task_queue_id, int size_tasks);
 void update_next_spawn(task *array_tasks, int size_tasks);
@@ -88,6 +88,7 @@ int main(){
     int p;
     int count_time = 0;
     char state_result = 'C';
+    char state_before = 'C';
     
     //Inicializando a primeira task
     array_tasks[1].state = 'P';
@@ -103,9 +104,26 @@ int main(){
         printf("Processing: %d \n", p);
         printf("Rest Burst: %d \n", array_tasks[p].rest_burst);
 
+        state_before = array_tasks[p].state;
+        printf("State before: %c \n", state_before);
         state_result = should_change_state(array_tasks, size_tasks, count_time, time_total, p);
+        printf("State result: %c \n", state_result);
 
-        count_time++;
+        if (state_before != state_result){
+            array_tasks[p].state = state_result;
+            
+            // Chamar a próxima task da fila
+            next_to_process(array_tasks, size_tasks, task_queue_id, p);
+
+            
+            //Chamar aqui o relatório
+            printf("Count time: %d \n", count_time);
+            count_time = 0;
+        }else{
+            count_time++;
+            //Chamar aqui o relatório
+            printf("Count time: %d \n", count_time);
+        }
     }
 
 
@@ -125,17 +143,20 @@ int who_is_processing(task *array_tasks, int size_tasks){
     return id_processing;//em caso de retorno 0 nenhuma delas estão em execução.
 }
 
-//Refazer! --------------------------------------------------------------
-void next_to_process(task *array_tasks, int size_tasks, int act_time){
-    //Irá verificar se a task deve ser processada agora
-    for(int i = 0; i < size_tasks; i++){
-        if(array_tasks[i].period == 0){
-            array_tasks[i].state = 'P';
+//Revisar
+void next_to_process(task *array_tasks, int size_tasks, int *task_queue_id, int act_task_id){
+    //Irá verificar se outra task deve ser processada agora.
+    if(array_tasks[act_task_id].state != 'P'){
+        for (int i = 1; i < size_tasks; i++){
+            if(array_tasks[task_queue_id[i]].next_spawn == 0 ){
+                array_tasks[task_queue_id[i]].state = 'P';
+                break;
+            }
         }
     }
 }
 
-//Continuar desenvolvendo esta função ------------------------------------
+// Revisar
 char should_change_state(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id){
     //Irá verificar se a task deve mudar de estado
     if(array_tasks[act_id].rest_burst == 0){
