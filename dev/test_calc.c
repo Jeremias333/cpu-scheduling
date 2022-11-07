@@ -24,8 +24,8 @@ int size_tasks = 4; // lembrar de criar esta variavel e baseado na quantidade de
 
 int who_is_processing(task *array_tasks, int size_tasks);
 void update_rest_burst(task *array_tasks, int size_tasks, int act_task_id);
-void should_process_now(task *array_tasks, int size_tasks, int act_time);
-void should_change_state(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id);
+void next_to_process(task *array_tasks, int size_tasks, int act_time);
+char should_change_state(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id);
 void populate_queue_by_priority(task *array_tasks, int *task_queue_id, int size_tasks);
 void update_next_spawn(task *array_tasks, int size_tasks);
 
@@ -84,9 +84,10 @@ int main(){
     //Inicializando a fila de prioridades
     populate_queue_by_priority(array_tasks, task_queue_id, size_tasks);
 
-    //Area count time struct
+    //Area count time
     int p;
     int count_time = 0;
+    char state_result = 'C';
     
     //Inicializando a primeira task
     array_tasks[1].state = 'P';
@@ -98,8 +99,11 @@ int main(){
 
         //Atualizando o rest_burst de cada task
         update_rest_burst(array_tasks, size_tasks, p);
-        // printf("Processing: %d \n", p);
+        update_next_spawn(array_tasks, size_tasks);
+        printf("Processing: %d \n", p);
         printf("Rest Burst: %d \n", array_tasks[p].rest_burst);
+
+        state_result = should_change_state(array_tasks, size_tasks, count_time, time_total, p);
 
         count_time++;
     }
@@ -122,7 +126,7 @@ int who_is_processing(task *array_tasks, int size_tasks){
 }
 
 //Refazer! --------------------------------------------------------------
-void should_process_now(task *array_tasks, int size_tasks, int act_time){
+void next_to_process(task *array_tasks, int size_tasks, int act_time){
     //Irá verificar se a task deve ser processada agora
     for(int i = 0; i < size_tasks; i++){
         if(array_tasks[i].period == 0){
@@ -132,22 +136,27 @@ void should_process_now(task *array_tasks, int size_tasks, int act_time){
 }
 
 //Continuar desenvolvendo esta função ------------------------------------
-void should_change_state(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id){
+char should_change_state(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id){
     //Irá verificar se a task deve mudar de estado
     if(array_tasks[act_id].rest_burst == 0){
         array_tasks[act_id].state = 'F';
         array_tasks[act_id].rest_burst = array_tasks[act_id].cpu_burst;
+        return 'F';
     }else if(array_tasks[act_id].rest_burst > 0 && act_time == time_total){
         array_tasks[act_id].state = 'K';
         array_tasks[act_id].rest_burst = array_tasks[act_id].cpu_burst;
         array_tasks[act_id].next_spawn = array_tasks[act_id].period;
+        return 'K';
     }else if(array_tasks[act_id].rest_burst > 0 && act_time < time_total){
         array_tasks[act_id].state = 'H';
+        return 'H';
     }else if(array_tasks[act_id].rest_burst > 0 && array_tasks[act_id].next_spawn == 0){
         array_tasks[act_id].state = 'L';
         array_tasks[act_id].rest_burst = array_tasks[act_id].cpu_burst;
+        return 'L';
     }else{
         printf("Erro ao mudar estado da task");
+        return 'E'
     }
 }
 
