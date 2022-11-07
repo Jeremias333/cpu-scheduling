@@ -156,7 +156,7 @@ char should_change_state(task *array_tasks, int size_tasks, int act_time, int ti
         return 'L';
     }else{
         printf("Erro ao mudar estado da task");
-        return 'E'
+        return 'E';
     }
 }
 
