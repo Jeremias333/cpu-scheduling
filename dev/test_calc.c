@@ -20,52 +20,54 @@ typedef struct {
     int next_spawn;
 }task;
 
-int size_tasks = 4; // lembrar de criar esta variavel e baseado na quantidade de tasks criar um vetor de tasks
+int size_tasks = 3; // lembrar de criar esta variavel e baseado na quantidade de tasks criar um vetor de tasks
 
 int who_is_processing(task *array_tasks, int size_tasks);
 void update_rest_burst(task *array_tasks, int size_tasks, int act_task_id);
 void next_to_process(task *array_tasks, int size_tasks, int *task_queue_id, int act_task_id);
-char should_change_state(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id);
+char should_change_state(task *array_tasks, int *task_queue_id, int size_tasks, int act_time, int time_total, int act_id);
 void populate_queue_by_priority(task *array_tasks, int *task_queue_id, int size_tasks);
 void update_next_spawn(task *array_tasks, int size_tasks);
+int search_for_next_spawn(task *array_tasks, int *task_queue_id, int size_tasks);
 
 
 int main(){
     task array_tasks[size_tasks];
     int task_queue_id[size_tasks];
 
-    int time_total = 165;
+    int time_total = 165+1;
+    int time_idle = 0;
     
     task t1;
     t1.id = 1;
     t1.name = "T1";
-    t1.period = 25;
-    t1.cpu_burst = 30;
-    t1.state = 'C';
-    t1.rest_burst = 30;
-    t1.next_spawn = 25;
+    t1.period = 50;
+    t1.cpu_burst = 25;
+    t1.state = 'Q';
+    t1.rest_burst = 25;
+    t1.next_spawn = 50;
 
     task t2;
     t2.id = 2;
     t2.name = "T2";
     t2.period = 80;
-    t2.cpu_burst = 120;
-    t2.state = 'C';
-    t2.rest_burst = 120;
+    t2.cpu_burst = 35;
+    t2.state = 'Q';
+    t2.rest_burst = 35;
     t2.next_spawn = 80;
 
-    task t3;
-    t3.id = 3;
-    t3.name = "T3";
-    t3.period = 10;
-    t3.cpu_burst = 165;
-    t3.state = 'C';
-    t3.rest_burst = 165;
-    t3.next_spawn = 10;
+    // task t3;
+    // t3.id = 3;
+    // t3.name = "T3";
+    // t3.period = 10;
+    // t3.cpu_burst = 165;
+    // t3.state = 'C';
+    // t3.rest_burst = 165;
+    // t3.next_spawn = 10;
 
     array_tasks[1] = t1;
     array_tasks[2] = t2;
-    array_tasks[3] = t3;
+    // array_tasks[3] = t3;
 
     // printf("array_tasks[1].id = %d", array_tasks[1].id);
 
@@ -81,52 +83,67 @@ int main(){
         printf("next_spawn: %d \n", array_tasks[i].next_spawn);
     }
 
+    printf("\n");
+
     //Inicializando a fila de prioridades
     populate_queue_by_priority(array_tasks, task_queue_id, size_tasks);
 
     //Area count time
     int p;
+    int n;
     int count_time = 0;
     char state_result = 'C';
     char state_before = 'C';
     
     //Inicializando a primeira task
-    array_tasks[1].state = 'P';
-
+    array_tasks[task_queue_id[1]].state = 'P';
+    int temp_time = 0;
     //Contador de tempo
-    for(int i = 0; i < time_total; i++){
+    for(int i = 1; i < time_total; i++){
+        temp_time += 1;
+        count_time++;
         //Verificando qual task está em execução nesta unidade de tempo
         p = who_is_processing(array_tasks, size_tasks);
 
         //Atualizando o rest_burst de cada task
         update_rest_burst(array_tasks, size_tasks, p);
         update_next_spawn(array_tasks, size_tasks);
-        printf("Processing: %d \n", p);
-        printf("Rest Burst: %d \n", array_tasks[p].rest_burst);
 
-        state_before = array_tasks[p].state;
-        printf("State before: %c \n", state_before);
-        state_result = should_change_state(array_tasks, size_tasks, count_time, time_total, p);
-        printf("State result: %c \n", state_result);
-
-        if (state_before != state_result){
-            array_tasks[p].state = state_result;
+        n = search_for_next_spawn(array_tasks, task_queue_id, size_tasks);
+        
+        if(p != n && n != 0){
             
-            // Chamar a próxima task da fila
-            next_to_process(array_tasks, size_tasks, task_queue_id, p);
+        }
 
-            
-            //Chamar aqui o relatório
-            printf("Count time: %d \n", count_time);
-            count_time = 0;
+        if (p == -1){
+            //CPU estará em IDLE para este caso
+            time_idle += 1;
         }else{
-            count_time++;
-            //Chamar aqui o relatório
-            printf("Count time: %d \n", count_time);
+            // printf("Processing: %d \n", p);
+            // printf("Rest Burst: %d \n", array_tasks[p].rest_burst);
+            // printf("Next Spawn 1: %d \n", array_tasks[p].next_spawn);
+            // printf("Next Spawn 2: %d \n", array_tasks[p].next_spawn);
+
+            state_before = array_tasks[p].state;
+            // printf("State before: %c \n", state_before);
+            state_result = should_change_state(array_tasks, task_queue_id, size_tasks, i, time_total, p);
+            // printf("State result: %c \n", state_result);
+
+            if (state_before != state_result){
+                array_tasks[p].state = state_result;
+                
+                // Chamar a próxima task da fila
+                next_to_process(array_tasks, size_tasks, task_queue_id, p);
+
+                
+                //Chamar aqui o relatório
+                printf("[%s] for %d units - %c\n", array_tasks[p].name, count_time, array_tasks[p].state);
+                count_time = 0;
+            }
         }
     }
 
-
+    printf("Time total: %d \n", temp_time);
 
 }
 
@@ -134,10 +151,17 @@ int main(){
 int who_is_processing(task *array_tasks, int size_tasks){
     //Irá retornar o id da task que está sendo processada
     int id_processing = 0;
+    int temp = 0;
     for(int i = 1; i < size_tasks; i++){
         if(array_tasks[i].state == 'P'){
             id_processing = i;
             return id_processing;
+        }if(array_tasks[i].state == 'K' || array_tasks[i].state == 'L' || array_tasks[i].state == 'H'){
+            temp += 1;
+            if(temp == size_tasks-1){
+                id_processing = -1;
+                return id_processing;
+            }
         }
     }
     return id_processing;//em caso de retorno 0 nenhuma delas estão em execução.
@@ -148,8 +172,9 @@ void next_to_process(task *array_tasks, int size_tasks, int *task_queue_id, int 
     //Irá verificar se outra task deve ser processada agora.
     if(array_tasks[act_task_id].state != 'P'){
         for (int i = 1; i < size_tasks; i++){
-            if(array_tasks[task_queue_id[i]].next_spawn == 0 ){
+            if(array_tasks[task_queue_id[i]].next_spawn == 0 || array_tasks[task_queue_id[i]].state == 'Q'){
                 array_tasks[task_queue_id[i]].state = 'P';
+                // array_tasks[task_queue_id[i]].next_spawn = array_tasks[task_queue_id[i]].period;
                 break;
             }
         }
@@ -157,27 +182,42 @@ void next_to_process(task *array_tasks, int size_tasks, int *task_queue_id, int 
 }
 
 // Revisar
-char should_change_state(task *array_tasks, int size_tasks, int act_time, int time_total, int act_id){
+char should_change_state(task *array_tasks, int *task_queue_id, int size_tasks, int act_time, int time_total, int act_id){
     //Irá verificar se a task deve mudar de estado
-    if(array_tasks[act_id].rest_burst == 0){
+    if(array_tasks[act_id].rest_burst == 0 && array_tasks[act_id].state == 'P'){
+        //Para cair em Finished a task precisa ter rest_burst = 0 e estar em execução.
         array_tasks[act_id].state = 'F';
         array_tasks[act_id].rest_burst = array_tasks[act_id].cpu_burst;
         return 'F';
-    }else if(array_tasks[act_id].rest_burst > 0 && act_time == time_total){
+    }else if(array_tasks[act_id].rest_burst > 0 && act_time >= time_total){
+        //Para cair em Killed é necessário rest_burst ser maior que zero e o tempo atual ser
+        //maior ou igual ao tempo total.
         array_tasks[act_id].state = 'K';
         array_tasks[act_id].rest_burst = array_tasks[act_id].cpu_burst;
         array_tasks[act_id].next_spawn = array_tasks[act_id].period;
         return 'K';
-    }else if(array_tasks[act_id].rest_burst > 0 && act_time < time_total){
-        array_tasks[act_id].state = 'H';
-        return 'H';
     }else if(array_tasks[act_id].rest_burst > 0 && array_tasks[act_id].next_spawn == 0){
         array_tasks[act_id].state = 'L';
         array_tasks[act_id].rest_burst = array_tasks[act_id].cpu_burst;
+        array_tasks[act_id].next_spawn = array_tasks[act_id].period;
         return 'L';
+    }else if(array_tasks[act_id].rest_burst > 0 && act_time < time_total){
+        //Entrar em hold quando a task em questão tiver o rest_burst > 0 mas o tempo atual
+        // ser maior que o tempo total e alguma outra task irá ser executada
+        int temp_sfns = search_for_next_spawn(array_tasks, task_queue_id, size_tasks);
+        if (temp_sfns == 0){
+            return 'P';
+        }else{
+            if (temp_sfns != act_id){
+                array_tasks[act_id].state = 'H';
+                array_tasks[act_id].rest_burst = array_tasks[act_id].cpu_burst;
+                array_tasks[act_id].next_spawn = array_tasks[act_id].period;
+                return 'H';
+            }
+            return 'P';
+        }
     }else{
-        printf("Erro ao mudar estado da task");
-        return 'E';
+        return 'P';
     }
 }
 
@@ -185,19 +225,30 @@ char should_change_state(task *array_tasks, int size_tasks, int act_time, int ti
 void update_rest_burst(task *array_tasks, int size_tasks, int act_task_id){
     //Irá atualizar o tempo restante para a task finalizar.
     //Para esse caso estamos diminuindo.
-    array_tasks[act_task_id].rest_burst--;
+    if(array_tasks[act_task_id].state == 'P'){
+        array_tasks[act_task_id].rest_burst--;
+    }
 }
 
 //Revisado
 void update_next_spawn(task *array_tasks, int size_tasks){
     //Irá atualizar o tempo restante para a task reiniciar.
     //Para esse caso estamos diminuindo baseado no periodo
-    //Tanto para quem está processando como para quem está na espera.
     for(int i = 1; i < size_tasks; i++){
-        if(array_tasks[i].state == 'P' || array_tasks[i].state == 'H'){
+        if (array_tasks[i].next_spawn > 0){
             array_tasks[i].next_spawn--;
         }
     }
+}
+
+int search_for_next_spawn(task *array_tasks, int *task_queue_id, int size_tasks){
+    //Irá retornar o id da task que está com next_spawn em 0 (irá executar agora)
+    for(int i = 1; i < size_tasks; i++){
+        if(array_tasks[task_queue_id[i]].next_spawn == 0){
+            return task_queue_id[i];
+        }
+    }
+    return 0;
 }
 
 
