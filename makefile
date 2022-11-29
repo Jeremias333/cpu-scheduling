@@ -20,6 +20,7 @@ run:
 
 clean:
 	rm rate
+	rm rate_jos.out
 
 run-dev:
 	./rate
