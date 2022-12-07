@@ -8,10 +8,8 @@ typedef struct {
     char *name; // nome da task
     int period; // de quanta em quantas unidades de tempo irá iniciar a task
     int cpu_burst; // tempo de execução necessário
-    char state; // estado atual (P, C, Q, F, H, L, K)
+    char state; // estado atual (P, F, H, L, K)
                 // P = Processing
-                // C = Created
-                // Q = Queued
                 // F = Finished
                 // H = Hold
                 // L = Lost
@@ -24,6 +22,7 @@ typedef struct {
 }task;
 
 int size_tasks = 3; // lembrar de criar esta variavel e baseado na quantidade de tasks criar um vetor de tasks
+int enable_wait = 0;
 
 int who_is_processing(task *array_tasks, int size_tasks);
 void update_rest_burst(task *array_tasks, int size_tasks, int act_task_id);
@@ -43,16 +42,41 @@ int main(){
 
     initialize_output();
 
-    int time_total = 165+1;
+    // int time_total = 165+1;
+    int time_total = 200+1;
     int time_idle = 0;
     
+    // task t1;
+    // t1.id = 1;
+    // t1.name = "T1";
+    // t1.period = 50;
+    // t1.cpu_burst = 25;
+    // t1.state = 'H';
+    // t1.rest_burst = 25;
+    // t1.next_spawn = 50;
+    // t1.lost = 0;
+    // t1.complete = 0;
+    // t1.killed = 0;
+
+    // task t2;
+    // t2.id = 2;
+    // t2.name = "T2";
+    // t2.period = 80;
+    // t2.cpu_burst = 35;
+    // t2.state = 'H';
+    // t2.rest_burst = 35;
+    // t2.next_spawn = 80;
+    // t2.lost = 0;
+    // t2.complete = 0;
+    // t2.killed = 0;
+
     task t1;
     t1.id = 1;
-    t1.name = "T1";
+    t1.name = "P1";
     t1.period = 50;
-    t1.cpu_burst = 25;
+    t1.cpu_burst = 20;
     t1.state = 'H';
-    t1.rest_burst = 25;
+    t1.rest_burst = 20;
     t1.next_spawn = 50;// A primeira vez que inicializamos a task ela deve ter o mesmo valor que o rest_burst total.
     t1.lost = 0;
     t1.complete = 0;
@@ -60,25 +84,27 @@ int main(){
 
     task t2;
     t2.id = 2;
-    t2.name = "T2";
-    t2.period = 80;
+    t2.name = "P2";
+    t2.period = 100;
     t2.cpu_burst = 35;
     t2.state = 'H';
     t2.rest_burst = 35;
-    t2.next_spawn = 80;// A primeira vez que inicializamos a task ela deve ter o mesmo valor que o rest_burst total.
+    t2.next_spawn = 100;// A primeira vez que inicializamos a task ela deve ter o mesmo valor que o rest_burst total.
     t2.lost = 0;
     t2.complete = 0;
     t2.killed = 0;
 
-    // task t3;
-    // t3.id = 3;
-    // t3.name = "T3";
-    // t3.period = 10;
-    // t3.cpu_burst = 165;
-    // t3.state = 'C';
-    // t3.rest_burst = 165;
-    // t3.next_spawn = 10;
 
+    task t0;
+    t0.id = 3;
+    t0.name = "IDLE";
+    t0.period = 9999;
+    t0.cpu_burst = 9999;
+    t0.state = 'H';
+    t0.rest_burst = 9999;
+    t0.next_spawn = 9999;
+
+    array_tasks[0] = t0;//incializando a task idle
     array_tasks[1] = t1;
     array_tasks[2] = t2;
     // array_tasks[3] = t3;
@@ -105,71 +131,57 @@ int main(){
     //Area count time
     int p_id = 1;
     int n_id = 1;
-    int count_time = 0;
+    int count_time = 1;
     char state_result = 'H';
     char state_before = 'H';
     int aux_count = 0;
-    int enable_wait = 0;
-    int wait_time = 0;
     
     //Inicializando a primeira task
     array_tasks[task_queue_id[1]].state = 'P';
-    int temp_time = 0;
-
+    int time_total_count = 0;
     //Contador de tempo
     for(int i = 1; i < time_total; i++){
-        temp_time += 1;
+        time_total_count += 1;
 
-        if (enable_wait == 1){
-            wait_time += 1;
-        }
+        // if (enable_wait == 1){
+            
+        // }
 
         //Verificando qual task está em execução nesta unidade de tempo
         p_id = who_is_processing(array_tasks, size_tasks);
         // next_to_process(array_tasks, size_tasks, task_queue_id, p);
 
-        //Atualizando o rest_burst de cada task
-        update_rest_burst(array_tasks, size_tasks, p_id);
+        
         update_next_spawn(array_tasks, size_tasks);
 
-        // n = search_for_next_spawn(array_tasks, task_queue_id, size_tasks, p);
+        if (p_id == 0){
+            if (time_idle == 0){
+                count_time = 0;
+            }
+            time_idle += 1;
+            count_time ++;
+            next_to_process(array_tasks, size_tasks, task_queue_id, p_id);
+        }else{
+            if (time_idle > 0){
+                FILE *output_file;
+                output_file = fopen("rate_jos.out", "a");
+                if (output_file == NULL){
+                    printf("Erro ao abrir o arquivo de saída \n");
+                    exit(1);
+                }
+                fprintf(output_file, "idle for %d units\n", time_idle);
+                fclose(output_file);
+                time_idle = 0;
+                count_time = 1;
+            }
 
-        // printf("next = %d\n", n);
-
-        // if (n != 0 && n != p){
-        //     next_to_process(array_tasks, size_tasks, task_queue_id, p);
-        //     p = n;
-        // }
-
-        // if(p != n && n != 0){
-        //     p = n;
-        // }
-
-        // if (p == 0){
-        //     p = n;
-        //     // printf("p = %d\n", p);
-        //     // printf("array_tasks[1].state = %c\n", array_tasks[1].state);
-        //     // printf("array_tasks[2].state = %c\n", array_tasks[2].state);
-
-        // }
-
-        // if (p == -1){
-        //     //CPU estará em IDLE para este caso
-        //     time_idle += 1;
-        //     if (n != 0){
-        //         p = n;
-        //     }
-        // }else{
-            // printf("Processing: %d \n", p);
-            // printf("Rest Burst: %d \n", array_tasks[p].rest_burst);
-            // printf("Next Spawn 1: %d \n", array_tasks[p].next_spawn);
-            // printf("Next Spawn 2: %d \n", array_tasks[p].next_spawn);
+            //Atualizando o rest_burst de cada task
+            update_rest_burst(array_tasks, size_tasks, p_id);
 
             state_before = array_tasks[p_id].state;
             // printf("State before: %c \n", state_before);
             state_result = should_change_state(array_tasks, task_queue_id, size_tasks, i, time_total, p_id);
-
-            next_to_process(array_tasks, size_tasks, task_queue_id, p_id);
+            
             // printf("State result: %c \n", state_result);
             aux_count = count_time;
 
@@ -190,7 +202,10 @@ int main(){
                 }
                 
             }
-        // }
+
+            next_to_process(array_tasks, size_tasks, task_queue_id, p_id);
+        }
+
         system("clear");
         for(int i = 1; i < size_tasks; i++){
             printf("\n");
@@ -206,6 +221,7 @@ int main(){
 
         printf("\n");
         printf("[%s] for %d units - %c\n", array_tasks[p_id].name, aux_count, array_tasks[p_id].state);
+        printf("Time act: %d \n", time_total_count);
         getchar();
 
         count_time++;
@@ -218,7 +234,7 @@ int main(){
 //REVISADO
 int who_is_processing(task *array_tasks, int size_tasks){
     //Irá retornar o id da task que está sendo processada
-    int id_processing = -1; 
+    int id_processing = 0; 
 
     for(int i = 1; i < size_tasks; i++){
         if(array_tasks[i].state == 'P'){
@@ -227,6 +243,7 @@ int who_is_processing(task *array_tasks, int size_tasks){
             return id_processing;
         }
     }
+    
     return id_processing;//em caso de retorno -1 nenhuma delas estão em execução.
 }
 
@@ -266,6 +283,7 @@ char should_change_state(task *array_tasks, int *task_queue_id, int size_tasks, 
         //Para cair em Finished a task precisa ter rest_burst = 0 e estar em execução.
         array_tasks[act_id].state = 'F';
         array_tasks[act_id].rest_burst = array_tasks[act_id].cpu_burst;
+        // array_tasks[act_id].next_spawn = array_tasks[act_id].period;
         array_tasks[act_id].complete += 1;
         return 'F';
 
@@ -294,10 +312,12 @@ char should_change_state(task *array_tasks, int *task_queue_id, int size_tasks, 
             return 'P';
         }else if (temp_sfns != act_id){
             array_tasks[act_id].state = 'H';
+            write_line_output("Entrou em temp_sfns diferente e retornou H", temp_sfns, 'E');
             return 'H';
         } 
     }else{
         printf("Entrou em 2\n");
+        write_line_output("Entrou em 2 e retornou P", 0, 'E');
         return 'P';
     }
 }
