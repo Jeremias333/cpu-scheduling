@@ -42,9 +42,9 @@ int main(){
 
     initialize_output();
 
-    // int time_total = 165+1;
+    // int time_total = 165+2;
     int time_total = 200+2;
-    // int time_total = 250+1;
+    // int time_total = 250+2;
     int time_idle = 0;
     
     // task t1;
@@ -132,7 +132,7 @@ int main(){
     // t3.killed = 0;
 
     task t0;
-    t0.id = 3;
+    t0.id = 0;
     t0.name = "IDLE";
     t0.period = 9999;
     t0.cpu_burst = 9999;
@@ -209,20 +209,20 @@ int main(){
             // printf("State result: %c \n", state_result);
             aux_count = count_time;
 
-            if (i == time_total+1){
-                break;
-            }
-
             if (state_before != state_result){
 
                 if (state_result != 'P'){
                     //Chamar aqui o relatório
                     // printf("[%s] for %d units - %c\n", array_tasks[p].name, count_time, array_tasks[p].state);
-                    write_line_output(array_tasks[p_id].name, count_time, array_tasks[p_id].state);
-                    // printf("p: %d \n", p);
-                    printf("Valor atual de i: %d \n", i);
-                    aux_count = count_time;
-                    count_time = 0;
+                    if (i < time_total-1){
+                        // break;
+                        write_line_output(array_tasks[p_id].name, count_time, array_tasks[p_id].state);
+                        // printf("p: %d \n", p);
+                        printf("Valor atual de i: %d \n", i);
+                        aux_count = count_time;
+                        count_time = 0;
+                    }
+                    
                 }
                 
             }
@@ -233,6 +233,7 @@ int main(){
                     array_tasks[i].next_spawn = array_tasks[i].period;
                 }
             }
+            
         }
 
         system("clear");
@@ -251,7 +252,7 @@ int main(){
         printf("\n");
         printf("[%s] for %d units - %c\n", array_tasks[p_id].name, aux_count, array_tasks[p_id].state);
         printf("Time act: %d \n", time_total_count);
-        getchar();
+        // getchar();
 
         count_time++;
     }
@@ -328,12 +329,12 @@ char should_change_state(task *array_tasks, int *task_queue_id, int size_tasks, 
         array_tasks[act_id].complete += 1;
         return 'F';
 
-    }else if(array_tasks[act_id].rest_burst > 0 && act_time >= time_total-1){
+    }else if(array_tasks[act_id].rest_burst > 0 && act_time >= time_total-2){
         //Para cair em Killed é necessário rest_burst ser maior que zero e o tempo atual ser
         //maior ou igual ao tempo total.
         //Se uma tarefa tomou kill, provavelmente todas outras P ou H também irão tomar
         for (int i = 1; i < size_tasks; i++){
-            if((array_tasks[i].state == 'P' || array_tasks[i].state == 'H') && array_tasks[i].next_spawn == 0){
+            if(array_tasks[i].state == 'P' || array_tasks[i].state == 'H' || array_tasks[i].next_spawn == 0){
                 array_tasks[i].state = 'K';
                 array_tasks[i].killed += 1;
             }
@@ -351,7 +352,7 @@ char should_change_state(task *array_tasks, int *task_queue_id, int size_tasks, 
         array_tasks[act_id].lost += 1;
         return 'L';
 
-    }else if(array_tasks[act_id].rest_burst > 0 && act_time < time_total){
+    }else if(array_tasks[act_id].rest_burst > 0 && act_time <= time_total){
         //Entrar em hold quando a task em questão tiver o rest_burst > 0 mas o tempo atual
         //sendo maior que o tempo total e alguma outra task irá ser executada
         int temp_sfns = search_for_next_spawn(array_tasks, task_queue_id, size_tasks, act_id);
