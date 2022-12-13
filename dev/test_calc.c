@@ -230,10 +230,6 @@ int main(){
             next_to_process(array_tasks, size_tasks, task_queue_id, p_id);
             for (int i = 1; i < size_tasks; i++){
                 if (array_tasks[i].next_spawn == 0){
-                    // if(array_tasks[i].state == 'H'){
-                    //     array_tasks[i].lost += 1;
-                    //     array_tasks[i].rest_burst = array_tasks[i].cpu_burst;
-                    // }
                     array_tasks[i].next_spawn = array_tasks[i].period;
                 }
             }
