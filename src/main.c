@@ -270,6 +270,13 @@ void next_to_process(task *array_tasks, int size_tasks, int *task_queue_id, int 
     if(array_tasks[act_task_id].state != 'P'){
         for (int i = 1; i < size_tasks; i++){
             if(array_tasks[task_queue_id[i]].state == 'H'){
+                if (array_tasks[task_queue_id[i]].next_spawn == 0){
+                    array_tasks[task_queue_id[i]].state = 'P';
+                    array_tasks[task_queue_id[i]].lost += 1;
+                    array_tasks[task_queue_id[i]].next_spawn = array_tasks[task_queue_id[i]].period;
+                    array_tasks[task_queue_id[i]].rest_burst = array_tasks[task_queue_id[i]].cpu_burst;
+                    break;
+                }
                 array_tasks[task_queue_id[i]].state = 'P';
                 break;
             }else if(array_tasks[task_queue_id[i]].state == 'F' 
@@ -439,6 +446,10 @@ void report_write(task *array_tasks, int size_tasks){
     }
     fprintf(output_file, "\nKILLED\n");
     for(int i = 1; i < size_tasks; i++){
+        if (i == size_tasks-1){
+            fprintf(output_file, "[%s] %d", array_tasks[i].name, array_tasks[i].killed);
+            continue;
+        }
         fprintf(output_file, "[%s] %d\n", array_tasks[i].name, array_tasks[i].killed);
     }
 }
