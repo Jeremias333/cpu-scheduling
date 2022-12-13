@@ -322,7 +322,7 @@ char should_change_state(task *array_tasks, int *task_queue_id, int size_tasks, 
         if (temp_sfns == -1){
             return 'P';
         }else if (temp_sfns != act_id){
-            if (temp_sfns > act_id){
+            if (array_tasks[temp_sfns].period > array_tasks[act_id].period){
                 array_tasks[temp_sfns].state = 'H';
                 return 'P';
             }else{

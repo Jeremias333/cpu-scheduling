@@ -218,7 +218,7 @@ int main(){
                         // break;
                         write_line_output(array_tasks[p_id].name, count_time, array_tasks[p_id].state);
                         // printf("p: %d \n", p);
-                        printf("Valor atual de i: %d \n", i);
+                        // printf("Valor atual de i: %d \n", i);
                         aux_count = count_time;
                         count_time = 0;
                     }
@@ -360,7 +360,7 @@ char should_change_state(task *array_tasks, int *task_queue_id, int size_tasks, 
             printf("Entrou em 1\n");
             return 'P';
         }else if (temp_sfns != act_id){
-            if (temp_sfns > act_id){
+            if (array_tasks[temp_sfns].period > array_tasks[act_id].period){
                 array_tasks[temp_sfns].state = 'H';
                 return 'P';
             }else{
